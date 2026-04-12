@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:5000/api";
+const API_URL = "https://smart-campus-events-management.onrender.com";
 
 export const getEvents = async () => {
   const res = await fetch(`${BASE_URL}/events`);
