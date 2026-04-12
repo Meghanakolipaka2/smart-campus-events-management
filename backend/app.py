@@ -2,7 +2,7 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
-from extensions import db, jwt   # ✅ BEST PRACTICE
+from extensions import db, jwt
 
 load_dotenv()
 
@@ -15,12 +15,13 @@ def create_app():
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
 
     # ================= DATABASE =================
-    DB_USER = os.getenv('DB_USER', 'root')
-    DB_PASS = os.getenv('DB_PASS', '')
-    DB_HOST = os.getenv('DB_HOST', 'localhost')
-    DB_NAME = os.getenv('DB_NAME', 'smart_campus')
+    DATABASE_URL = os.getenv("DATABASE_URL")
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
+    if DATABASE_URL:
+        app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///test.db"
+
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # ================= INIT =================
@@ -45,7 +46,6 @@ def create_app():
 
     # ================= CREATE TABLES =================
     with app.app_context():
-        # 🔥 Import ALL models (VERY IMPORTANT)
         from models.user import User, Event, Registration, Bookmark, Notification, Venue
 
         db.create_all()
@@ -90,4 +90,6 @@ def seed_data():
 # ================= RUN =================
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+
+    port = int(os.environ.get("PORT", 5000))  # 🔥 IMPORTANT FOR RENDER
+    app.run(host="0.0.0.0", port=port)
