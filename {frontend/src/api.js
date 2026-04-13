@@ -1,37 +1,16 @@
-const handleLogin = async () => {
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
   try {
-    console.log("Login triggered");
+    const res = await authAPI.login(form);
 
-    const response = await fetch(
-      "https://your-actual-backend-url.onrender.com/api/auth/login", // ✅ FIXED
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: form.email,
-          password: form.password,
-        }),
-      }
-    );
+    login(res.data.user, res.data.token);
 
-    const data = await response.json();
-    console.log("Response:", data);
-
-    if (response.ok) {
-      alert("Login successful ✅");
-
-      // Save token
-      localStorage.setItem("token", data.token);
-
-      // Redirect
-      window.location.href = "/dashboard";
-    } else {
-      alert(data.message || "Login failed ❌");
-    }
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Server error ❌");
+    toast.success(`Welcome back, ${res.data.user.name}!`);
+    navigate('/dashboard');
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Login failed');
+  } finally {
+    setLoading(false);
   }
 };
