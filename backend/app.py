@@ -6,6 +6,7 @@ from extensions import db, jwt
 
 load_dotenv()
 
+
 def create_app():
     app = Flask(__name__)
 
@@ -27,7 +28,23 @@ def create_app():
     # ================= INIT =================
     db.init_app(app)
     jwt.init_app(app)
-    CORS(app)
+
+    # ✅ FIXED CORS (VERY IMPORTANT)
+    CORS(
+        app,
+        resources={r"/*": {"origins": [
+            "https://smart-campus-events-management.vercel.app"
+        ]}},
+        supports_credentials=True
+    )
+
+    # ✅ EXTRA SAFETY (handles all browsers)
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+        return response
 
     # ================= ROUTES =================
     from routes.auth import auth_bp
@@ -91,5 +108,5 @@ def seed_data():
 if __name__ == '__main__':
     app = create_app()
 
-    port = int(os.environ.get("PORT", 5000))  # 🔥 IMPORTANT FOR RENDER
+    port = int(os.environ.get("PORT", 5000))  # ✅ REQUIRED FOR RENDER
     app.run(host="0.0.0.0", port=port)
